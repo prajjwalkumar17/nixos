@@ -115,7 +115,6 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-
     cargo  
     kitty
     python3Packages.virtualenv
@@ -174,6 +173,7 @@
     # dev utilities
     git
     meslo-lgs-nf
+    wl-clipboard
     zoxide
     zsh
     zsh-powerlevel10k
