@@ -115,13 +115,15 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    cargo  
-    kitty
+    # Languages
+    cargo
+    clang
+    cmake
+    gcc
+    jdk23
     python3Packages.virtualenv
     python3
     rustup
-    vim
-    wget
 
     # Hyperland
     bibata-cursors
@@ -148,16 +150,20 @@
     }))
 
     # NVIM
-    clang
-    cmake
     fzf
-    gcc
     gnumake
     libtool
     neovim
     pkg-config
     ripgrep
     vimPlugins.telescope-fzf-native-nvim
+
+    # Terminals
+    kitty
+    vim
+    zoxide
+    zsh
+    zsh-powerlevel10k
 
     # fonts
     (pkgs.nerdfonts.override {
@@ -169,14 +175,11 @@
       ];
     })
 
-    
     # dev utilities
     git
     meslo-lgs-nf
     wl-clipboard
-    zoxide
-    zsh
-    zsh-powerlevel10k
+    wget
 
     # utilities
     unzip
@@ -184,6 +187,7 @@
     # media
     spotify
   ];
+
   programs.thunar.enable = true;
   programs.hyprland.enable = true;
   environment.variables = {
