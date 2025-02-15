@@ -132,8 +132,12 @@
     bluez-alsa
     bluez-tools
     bluetui
+    cliphist
+    coreutils
     dunst
     grim
+    hyprpaper
+    jq
     libnotify
     networkmanagerapplet
     pulseaudio
@@ -156,10 +160,12 @@
     neovim
     pkg-config
     ripgrep
+    jdt-language-server
     vimPlugins.telescope-fzf-native-nvim
 
     # Terminals
     kitty
+    oh-my-zsh
     vim
     zoxide
     zsh
@@ -186,6 +192,12 @@
 
     # media
     spotify
+  ];
+  fonts.packages = with pkgs; [
+    font-awesome
+    powerline-fonts
+    powerline-symbols
+    (nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
   ];
 
   programs.thunar.enable = true;
