@@ -55,6 +55,7 @@
   # Enable the sddm Desktop Environment.
   services.displayManager.sddm = {
     enable = true;
+    theme = "sugar-dark";
     wayland.enable = true;
   };
 
@@ -137,14 +138,17 @@
     dunst
     grim
     hyprpaper
+    imagemagick
     jq
     libnotify
     networkmanagerapplet
+    pamixer
     pulseaudio
     pipewire
+    playerctl
     rofi-wayland
     swaynotificationcenter
-    swaylock
+    swaylock-effects
     swww
     wireplumber
     wofi
@@ -192,6 +196,13 @@
 
     # media
     spotify
+
+    # themes
+    libsForQt5.qt5.qtquickcontrols
+    libsForQt5.qt5.qtquickcontrols2
+    libsForQt5.qt5.qtgraphicaleffects
+    libsForQt5.full
+    sddm-sugar-dark
   ];
   fonts.packages = with pkgs; [
     font-awesome
@@ -199,6 +210,25 @@
     powerline-symbols
     (nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
   ];
+
+ # Enable swaylock PAM authentication
+  security.pam.services.swaylock = {
+    text = ''
+      auth include login
+    '';
+  };
+
+  # Set swaylock as the system screen locker
+  #programs.swaylock = {
+  #  enable = true;
+  #  package = pkgs.swaylock-effects;
+  #};
+
+  qt = {
+    enable = true;
+    platformTheme = "gnome";
+    style = "breeze";
+  };
 
   programs.thunar.enable = true;
   programs.hyprland.enable = true;
