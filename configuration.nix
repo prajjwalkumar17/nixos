@@ -2,10 +2,11 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
+
 
 {
-  imports =
+imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./modules/nvidia.nix
@@ -16,7 +17,7 @@
     loader = {
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
-      systemd-boot.configurationLimit = 5;
+      #systemd-boot.configurationLimit = 5;
       timeout = 3;
     };
   };
@@ -91,8 +92,8 @@
   users.users.hangsai = {
     isNormalUser = true;
     description = "hangsai";
+    shell = pkgs.zsh;
     extraGroups = [ "networkmanager" "wheel" ];
-    shell = "/run/current-system/sw/bin/zsh";
     packages = with pkgs; [
     #  thunderbird
     ];
@@ -100,13 +101,12 @@
 
   # Install firefox.
   programs.firefox.enable = true;
+  programs.zsh.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.allwInsecure = true;
-  # nixpkgs.config.permittedInsecurePackages = [
-  #	"python-2.7.18.8"
-  # ];
+  nixpkgs.config.allowInsecure = true;
+  nix.settings.experimental-features = ["nix-command" "flakes"];
 
   # Fonts
   fonts.fontDir.enable = true;
@@ -116,16 +116,6 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    # Languages
-    cargo
-    clang
-    cmake
-    gcc
-    jdk23
-    python3Packages.virtualenv
-    python3
-    rustup
-
     # Hyperland
     bibata-cursors
     brightnessctl
@@ -147,33 +137,25 @@
     pipewire
     playerctl
     rofi-wayland
+    slurp
     swaynotificationcenter
     swaylock-effects
     swww
     wireplumber
     wofi
+    wlogout
     waybar
     (pkgs.waybar.overrideAttrs (oldAttrs: {
       mesonFlags = oldAttrs.mesonFlags ++ ["-Dexperimental=true"];
     }))
 
-    # NVIM
-    fzf
-    gnumake
-    libtool
-    neovim
-    pkg-config
-    ripgrep
-    jdt-language-server
-    vimPlugins.telescope-fzf-native-nvim
-
     # Terminals
     kitty
-    oh-my-zsh
     vim
-    zoxide
     zsh
-    zsh-powerlevel10k
+
+    # Media
+    spotify
 
     # fonts
     (pkgs.nerdfonts.override {
@@ -184,18 +166,6 @@
 	"JetBrainsMono"
       ];
     })
-
-    # dev utilities
-    git
-    meslo-lgs-nf
-    wl-clipboard
-    wget
-
-    # utilities
-    unzip
-
-    # media
-    spotify
 
     # themes
     libsForQt5.qt5.qtquickcontrols
