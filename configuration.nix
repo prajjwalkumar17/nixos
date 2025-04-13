@@ -93,7 +93,7 @@ imports =
     isNormalUser = true;
     description = "hangsai";
     shell = pkgs.zsh;
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "podman" ];
     packages = with pkgs; [
     #  thunderbird
     ];
@@ -116,7 +116,6 @@ imports =
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    # Hyperland
     bibata-cursors
     brightnessctl
     bluez
@@ -154,6 +153,13 @@ imports =
     vim
     zsh
 
+    # SRE
+    kubectl
+    kubernetes
+    k3s
+    kubernetes-helm
+    skopeo
+
     # Media
     spotify
 
@@ -161,9 +167,9 @@ imports =
     (pkgs.nerdfonts.override {
       fonts = [
         "IBMPlexMono"
-	"Iosevka"
-	"IosevkaTerm"
-	"JetBrainsMono"
+        "Iosevka"
+        "IosevkaTerm"
+        "JetBrainsMono"
       ];
     })
 
@@ -214,16 +220,32 @@ imports =
   #   enableSSHSupport = true;
   # };
 
-  # List services that you want to enable:
+  # Enable podman
+  virtualisation.podman = {
+    enable = true;
+    dockerCompat = true;
+    defaultNetwork.settings.dns_enabled = true;
+  };
+
+  # Basic k3s configuration without custom containerd
+  services.k3s = {
+    enable = true;
+    role = "server";
+    # Remove the custom containerd flag
+  };
 
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
 
   # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
+  # port for kubernetes Api-server
+  networking.firewall.allowedTCPPorts = [ 6443 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
+  networking.extraHosts = ''
+    192.168.1.201 rust-server.local
+  '';
 
   system.stateVersion = "24.11"; # Did you read the comment?
 }
