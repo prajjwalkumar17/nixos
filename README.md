@@ -14,8 +14,8 @@ This repository contains a complete `configuration.nix` setup for my personal Ni
 
 When installing NixOS:
 
-- Choose **"Erase disk"** option for the main NVMe drive.
-- This will ensure `configuration.nix` and `hardware-configuration.nix` are generated cleanly with NVMe boot settings.
+- Choose "Erase disk" option for the main NVMe drive.
+- This ensures `configuration.nix` and `hardware-configuration.nix` are generated cleanly with NVMe boot settings.
 
 ---
 
@@ -23,7 +23,7 @@ When installing NixOS:
 
 After installation:
 
-```sh
+```bash
 nix-shell -p git
 git clone https://github.com/prajjwalkumar17/nixos.git
 ```
@@ -34,57 +34,50 @@ git clone https://github.com/prajjwalkumar17/nixos.git
 
 Do the following in `/etc/nixos`:
 
-```sh
+```bash
 cd /etc/nixos
-```
-
-- **Replace** the existing `configuration.nix` with the one from the repo:
-
-```sh
 cp ~/nixos/configuration.nix .
-```
-
-- **Copy the `modules/` folder** (contains things like NVIDIA setup):
-
-```sh
 cp -r ~/nixos/modules .
 ```
 
 ---
 
-## 🧩 4. Set Up Additional HDD Partitions
+### 🧩 4. Set Up Additional HDD Partitions
 
-### 🔍 Identify Drives
+#### 🔍 Identify Drives
 
-Run:
-
-```sh
+```bash
 lsblk -f
 ```
 
-Look for non-NVMe entries (e.g., `/dev/sda1`) and note:
+Look for non-NVMe entries (e.g., `/dev/sda1`, `/dev/sda2`) and note:
 
 - UUID
-- Filesystem (e.g., ext4)
+- Filesystem (e.g., `ext4`, `swap`)
 - Mount point (if any)
 
 Example output:
 
-```
+```text
 NAME   FSTYPE LABEL UUID                                 MOUNTPOINT
 sda
-├─sda1 ext4         a1b2c3d4-e5f6-7890-abcd-1234567890ab /mnt/data
+├─sda1 ext4         a1b2c3d4-e5f6-7890-abcd-1234567890ab 
 └─sda2 swap         1234abcd-56ef-7890-1234-abcdefabcdef [SWAP]
 ```
 
 ---
 
-### ✍️ Update `hardware-configuration.nix`
+#### ✍️ Update `hardware-configuration.nix`
 
 Add entries like:
 
 ```nix
-fileSystems."/mnt/data" = {
+fileSystems."/home/yourname/work" = {
+  device = "/dev/disk/by-uuid/a1b2c3d4-e5f6-7890-abcd-1234567890ab";
+  fsType = "ext4";
+};
+
+fileSystems."/home/yourname/utility" = {
   device = "/dev/disk/by-uuid/a1b2c3d4-e5f6-7890-abcd-1234567890ab";
   fsType = "ext4";
 };
@@ -94,13 +87,22 @@ swapDevices = [
 ];
 ```
 
-💡 You can change the mount point to `/home/yourname/hdd`, `/data`, etc.
+#### 📂 Create Mount Directories
+
+Create directories for mounting:
+
+```bash
+mkdir -p /home/yourname/work
+mkdir -p /home/yourname/utility
+```
+
+These paths will be used as mount points for your HDD.
 
 ---
 
 ### 🔁 5. Rebuild Your System
 
-```sh
+```bash
 sudo nixos-rebuild switch
 ```
 
@@ -108,7 +110,7 @@ sudo nixos-rebuild switch
 
 ## 📁 Project Structure
 
-```
+```text
 nixos/
 ├── configuration.nix       # Main config file to replace /etc/nixos/configuration.nix
 └── modules/                # Optional modules (e.g., NVIDIA-specific setup)
