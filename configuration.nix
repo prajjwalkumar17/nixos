@@ -53,12 +53,21 @@ imports =
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
-  # Enable the sddm Desktop Environment.
-  services.displayManager.sddm = {
+  # Enable the greetd Desktop Environment.
+  services.greetd = {
     enable = true;
-    theme = "sugar-dark";
-    wayland.enable = true;
+    settings = {
+      default_session = {
+        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --asterisks --cmd Hyprland --user-menu";
+	user = "greeter";
+      };
+    };
   };
+
+systemd.services.greetd = {
+  after = [ "systemd-user-sessions.service" ];
+  wants = [ "systemd-user-sessions.service" ];
+};
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -140,6 +149,7 @@ imports =
     swaynotificationcenter
     swaylock-effects
     swww
+    greetd.tuigreet
     wireplumber
     wofi
     wlogout
