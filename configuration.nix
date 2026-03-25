@@ -4,12 +4,15 @@
 
 { config, pkgs, lib, ... }:
 
-
+let
+  unstable = import <nixos-unstable> { config.allowUnfree = true; };
+in
 {
 imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./modules/nvidia.nix
+      ./openclaw.nix
     ];
 
   # Bootloader.
@@ -80,29 +83,25 @@ systemd.services.greetd = {
 
   # Enable sound with pipewire.
   hardware.pulseaudio.enable = false;
+
+  # Enable ALSA sound
   security.rtkit.enable = true;
+
+  # PipeWire configuration
   services.pipewire = {
     enable = true;
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
+    wireplumber.enable = true;
   };
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.hangsai = {
     isNormalUser = true;
     description = "hangsai";
     shell = pkgs.zsh;
-    extraGroups = [ "networkmanager" "wheel" "podman" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" ];
     packages = with pkgs; [
     #  thunderbird
     ];
@@ -125,24 +124,28 @@ systemd.services.greetd = {
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    alsa-utils
+    pavucontrol
     bibata-cursors
     brightnessctl
     bluez
     bluez-alsa
     bluez-tools
     bluetui
+    btop
     cliphist
     coreutils
+    curl
     dunst
     grim
     hyprpaper
     imagemagick
     jq
     libnotify
+    (unstable.llama-cpp.override { cudaSupport = true; })
     networkmanagerapplet
+    nvtop
     pamixer
-    pulseaudio
-    pipewire
     playerctl
     rofi-wayland
     slurp
@@ -150,7 +153,7 @@ systemd.services.greetd = {
     swaylock-effects
     swww
     greetd.tuigreet
-    wireplumber
+    uv
     wofi
     wlogout
     waybar
@@ -158,12 +161,20 @@ systemd.services.greetd = {
       mesonFlags = oldAttrs.mesonFlags ++ ["-Dexperimental=true"];
     }))
 
+    #openclaw
+    google-cloud-sdk
+
     # Terminals
     kitty
+    unstable.opencode
+    nodejs_22
     vim
     zsh
+    unstable.codex
+    unstable.antigravity
 
     # SRE
+    docker-compose
     kubectl
     kubernetes
     k3s
@@ -216,6 +227,7 @@ systemd.services.greetd = {
     style = "breeze";
   };
 
+  programs.nix-ld.enable = true;
   programs.thunar.enable = true;
   programs.hyprland.enable = true;
   environment.variables = {
@@ -230,11 +242,9 @@ systemd.services.greetd = {
   #   enableSSHSupport = true;
   # };
 
-  # Enable podman
-  virtualisation.podman = {
+  # Enable docker
+  virtualisation.docker = {
     enable = true;
-    dockerCompat = true;
-    defaultNetwork.settings.dns_enabled = true;
   };
 
   # Basic k3s configuration without custom containerd
@@ -244,17 +254,25 @@ systemd.services.greetd = {
     # Remove the custom containerd flag
   };
 
+  # llama setup
+
+  # If you use NVIDIA on NixOS:
+   nixpkgs.config.cudaSupport = true;
+   services.xserver.videoDrivers = [ "nvidia" ];
+   # hardware.nvidia.open = true; # (if you're on newer kernels/GPU)
+   hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+   services.openssh.enable = true;
 
   # Open ports in the firewall.
   # port for kubernetes Api-server
-  networking.firewall.allowedTCPPorts = [ 6443 ];
+  networking.firewall.allowedTCPPorts = [ 6443 11434 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
   networking.extraHosts = ''
     192.168.1.201 rust-server.local
+    127.0.0.1 n8n.local
   '';
 
   system.stateVersion = "24.11"; # Did you read the comment?
